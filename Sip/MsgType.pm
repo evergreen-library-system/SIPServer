@@ -944,6 +944,8 @@ sub handle_patron_info {
         $resp .= add_count('patron_info/recall_items',  scalar @{$patron->recall_items(undef,undef,1) });
         $resp .= add_count('patron_info/unavail_holds', scalar @{$patron->unavail_holds(undef,undef,1)});
 
+        $resp .= add_field(FID_INST_ID, $server->{ils}->institution);
+
         # while the patron ID we got from the SC is valid, let's
         # use the one returned from the ILS, just in case...
         $resp .= add_field(FID_PATRON_ID, $patron->id);
@@ -1009,18 +1011,17 @@ sub handle_patron_info {
         # no personal name, and is invalid (if we're using 2.00)
         $resp .= 'YYYY' . (' ' x 10) . $lang . Sip::timestamp();
         $resp .= '0000' x 6;
-        $resp .= add_field(FID_PERSONAL_NAME, '');
 
+        $resp .= add_field(FID_INST_ID, $server->{ils}->institution);
         # the patron ID is invalid, but it's a required field, so
         # just echo it back
         $resp .= add_field(FID_PATRON_ID, $fields->{(FID_PATRON_ID)});
+        $resp .= add_field(FID_PERSONAL_NAME, '');
 
         if ($protocol_version >= 2) {
             $resp .= add_field(FID_VALID_PATRON, 'N');
         }
     }
-
-    $resp .= add_field(FID_INST_ID, $server->{ils}->institution);
 
     $self->write_msg($resp);
 

@@ -982,6 +982,16 @@ sub handle_patron_info {
 
         $resp .= maybe_add(FID_SCREEN_MSG, $patron->screen_msg);
         $resp .= maybe_add(FID_PRINT_LINE, $patron->print_line);
+
+        # Custom ILS-defined protocol extensions
+        if ($patron->can('extra_fields')) {
+            my $extra_fields = $patron->extra_fields();
+            foreach my $field (keys %$extra_fields) {
+                foreach my $value (@{$extra_fields->{ $field }}) {
+                    $resp .= maybe_add($field, $value);
+                }
+            }
+        }
     } else {
         # Invalid patron ID
         # He has no privileges, no items associated with him,

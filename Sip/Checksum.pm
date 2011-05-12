@@ -65,21 +65,9 @@ sub debug_split_print {
 
 sub checksum {
     my $pkt   = shift;
-    # my $u   = unpack('%16U*', $pkt);
     my $u     = unpack('%U*', $pkt);
-    my $check = uc substr sprintf("%x", ~$u+1), -4;
-    if ($debug) {
-        my $total = debug_split_print($pkt);
-        $total == $u or warn "Internal error: mismatch between $total and $u";
-        printf STDERR "# checksum('$pkt')\n# %34s  HEX  DECIMAL\n", 'BINARY';
-        debug_print("ascii sum",      $u  );
-        debug_print("binary invert", ~$u  );
-        debug_print("add one",       ~$u+1);
-        printf STDERR "# %39s\n", $check;
-    }
-
+    my $check = ($u * -1) & 0xFFFF;
     return $check;
-    # return (-unpack('%16U*', $pkt) & 0xFFFF);
 }
 
 sub verify_cksum {

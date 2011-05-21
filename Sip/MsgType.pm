@@ -1129,6 +1129,16 @@ sub handle_item_information {
         $resp .= maybe_add(FID_CALL_NUMBER,      $item->call_number);          # Extension for AMH sorting
         $resp .= maybe_add(FID_SCREEN_MSG,       $item->screen_msg);
         $resp .= maybe_add(FID_PRINT_LINE,       $item->print_line);
+
+        # Custom ILS-defined protocol extensions
+        if ($item->can('extra_fields')) {
+            my $extra_fields = $item->extra_fields();
+            foreach my $field (keys %$extra_fields) {
+                foreach my $value (@{$extra_fields->{ $field }}) {
+                    $resp .= maybe_add($field, $value);
+                }
+            }
+        }
     }
 
     $self->write_msg($resp);

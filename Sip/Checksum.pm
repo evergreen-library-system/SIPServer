@@ -65,8 +65,7 @@ sub debug_split_print {
 
 sub checksum {
     my $pkt   = shift;
-    # my $u   = unpack('%16U*', $pkt);
-    my $u     = unpack('%U*', $pkt);
+    my $u     = unpack('%16C*', $pkt);
     my $check = ($u * -1) & 0xFFFF;
     if ($debug) {
         my $total = debug_split_print($pkt);
@@ -79,7 +78,6 @@ sub checksum {
     }
 
     return $check;
-    # return (-unpack('%16U*', $pkt) & 0xFFFF);
 }
 
 sub verify_cksum {

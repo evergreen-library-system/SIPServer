@@ -167,7 +167,7 @@ sub read_SIP_packet {
     {    # adapted from http://perldoc.perl.org/5.8.8/functions/readline.html
         for ( my $tries = 1 ; $tries <= 3 ; $tries++ ) {
             undef $!;
-            $record = readline($fh);
+            $record = decode_utf8(readline($fh));
             if ( defined($record) ) {
                 while ( chomp($record) ) { 1; }
                 $len1 = length($record);

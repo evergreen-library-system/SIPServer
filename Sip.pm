@@ -209,7 +209,7 @@ sub read_SIP_packet {
     #  
     # This is now handled by the vigorous cleansing above.
     syslog("LOG_INFO", encode_utf8("INPUT MSG: '$record'")) if $record;
-    return $record;
+    return encode_utf8($record);
 }
 
 #
@@ -227,7 +227,6 @@ sub write_msg {
     my ($self, $msg, $file) = @_;
     my $cksum;
 
-    $msg = encode_utf8($msg);
     if ($error_detection) {
         if (defined($self->{seqno})) {
             $msg .= 'AY' . $self->{seqno};

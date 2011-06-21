@@ -225,15 +225,12 @@ sub read_SIP_packet {
 
 sub write_msg {
     my ($self, $msg, $file) = @_;
-    my $cksum;
 
     if ($error_detection) {
         if (defined($self->{seqno})) {
             $msg .= 'AY' . $self->{seqno};
         }
-        $msg .= 'AZ';
-        $cksum = checksum($msg);
-        $msg .= sprintf('%04.4X', $cksum);
+        $msg .= 'AZ' . checksum($msg);
     }
 
 

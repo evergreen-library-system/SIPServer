@@ -77,7 +77,7 @@ sub checksum {
         printf STDERR "# %39s\n", $check;
     }
 
-    return $check;
+    return sprintf("%4.4X", $check);
 }
 
 sub verify_cksum {

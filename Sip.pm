@@ -230,7 +230,7 @@ sub write_msg {
         if (defined($self->{seqno})) {
             $msg .= 'AY' . $self->{seqno};
         }
-        $msg .= 'AZ' . checksum($msg);
+        $msg .= checksum($msg . 'AZ');
     }
 
 

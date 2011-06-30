@@ -516,7 +516,7 @@ sub handle_checkout {
     my $inst = $ils->institution;
     my ($sc_renewal_policy, $no_block, $trans_date, $nb_due_date);
     my $fields;
-    my ($patron_id, $item_id, $status);
+    my ($patron_id, $item_id, $status, $fee_ack);
     my ($item, $patron);
     my $resp;
 
@@ -526,6 +526,7 @@ sub handle_checkout {
 
     $patron_id = $fields->{(FID_PATRON_ID)};
     $item_id   = $fields->{(FID_ITEM_ID)};
+    $fee_ack = $fields->{(FID_FEE_ACK)};
 
 
     if ($no_block eq 'Y') {
@@ -540,7 +541,7 @@ sub handle_checkout {
     } else {
 	# Does the transaction date really matter for items that are
 	# checkout out while the terminal is online?  I'm guessing 'no'
-	$status = $ils->checkout($patron_id, $item_id, $sc_renewal_policy);
+	$status = $ils->checkout($patron_id, $item_id, $sc_renewal_policy, $fee_ack);
     }
 
 
@@ -616,6 +617,13 @@ sub handle_checkout {
 		$resp .= add_field(FID_VALID_PATRON_PWD,
 				   sipbool($patron->check_password($fields->{(FID_PATRON_PWD)})));
 	    }
+            # For the patron to accept a fee in chargeable loans, we
+            # need to return fee information.
+	    if ($status->fee_amount) {
+		$resp .= add_field(FID_FEE_AMT,  $status->fee_amount);
+		$resp .= maybe_add(FID_CURRENCY, $status->sip_currency);
+		$resp .= maybe_add(FID_FEE_TYPE, $status->sip_fee_type);
+            }
 	}
     }
 

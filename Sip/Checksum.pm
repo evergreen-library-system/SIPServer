@@ -59,7 +59,8 @@ sub debug_split_print {
         printf STDERR "= %4d\n\n", $subtotal;
     }
     printf STDERR "%56d\n", $total;
-    return $total;
+    # Pack, then upack to make sure we have 16-bit value.
+    return unpack("S", pack("S", $total));
 }
 
 

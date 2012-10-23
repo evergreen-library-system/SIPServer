@@ -54,11 +54,11 @@ sub debug_split_print {
     scalar(@row) and push @rows, \@row;
     foreach (@rows) {
         my $subtotal = 0;
-        print map {"   $_ "} @$_;
-        printf "\n%-50s", join '', map {sprintf " %3d ", $_} map {$subtotal += ord($_); ord($_)} @$_;
-        printf "= %4d\n\n", $subtotal;
+        print STDERR map {"   $_ "} @$_;
+        printf STDERR "\n%-50s", join '', map {sprintf " %3d ", $_} map {$subtotal += ord($_); ord($_)} @$_;
+        printf STDERR "= %4d\n\n", $subtotal;
     }
-    printf "%56d\n", $total;
+    printf STDERR "%56d\n", $total;
     return $total;
 }
 

@@ -90,6 +90,13 @@ sub add_field {
 	substr($value, $i, 1) = $ent;
     }
 
+    # SIP2 Protocol document specifies that variable fields are from 0
+    # to 255 characters in length.  We'll do a check of the field
+    # length and truncate if necessary.
+    if (length($value) > 255) {
+        $value = substr($value, 0, 255);
+    }
+
     return $field_id . $value . $field_delimiter;
 }
 #

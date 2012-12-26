@@ -919,6 +919,7 @@ sub handle_patron_info {
     my $fields = $self->{fields};
     my ($inst_id, $patron_id, $terminal_pwd, $patron_pwd, $start, $end);
     my ($resp, $patron, $count);
+    $lang ||= '000'; # unspecified
 
     $inst_id      = $fields->{(FID_INST_ID)};
     $patron_id    = $fields->{(FID_PATRON_ID)};
@@ -932,6 +933,8 @@ sub handle_patron_info {
     $resp = (PATRON_INFO_RESP);
     if ($patron) {
         $resp .= patron_status_string($patron);
+
+        $lang = $patron->language if $patron->language;
         $resp .= $lang . Sip::timestamp();
 
         $resp .= add_count('patron_info/hold_items',    scalar @{$patron->hold_items   });

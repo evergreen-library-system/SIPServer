@@ -152,6 +152,10 @@ sub process_request {
         # Transport has shut down, remove any lingering login info
         $self->{account} = undef;
     }
+
+    $self->sip_protocol_loop();
+
+    syslog("LOG_INFO", '%s: shutting down', $transport);
 }
 
 #
@@ -208,9 +212,6 @@ sub raw_transport {
         $self->{account}->{id},
         $self->{account}->{institution});
 
-    $self->sip_protocol_loop();
-
-    syslog("LOG_INFO", "raw_transport: shutting down");
 }
 
 sub telnet_transport {
@@ -266,8 +267,6 @@ sub telnet_transport {
 
     $self->{account} = $account;
     syslog("LOG_DEBUG", "telnet_transport: uname/inst: '%s/%s'", $account->{id}, $account->{institution});
-    $self->sip_protocol_loop();
-    syslog("LOG_INFO", "telnet_transport: shutting down");
 }
 
 

@@ -38,14 +38,14 @@ my $parser = new XML::Simple(
     KeyAttr => {
         login       => '+id',
         institution => '+id',
-        service     => '+port'
+        service     => '+port',
     },
     GroupTags => {
         listeners    => 'service',
         accounts     => 'login',
         institutions => 'institution',
     },
-    ForceArray => [ 'service', 'login', 'institution' ],
+    ForceArray => [ 'service', 'login', 'institution', 'server' ],
     ValueAttr  => {
         'error-detect' => 'enabled',
         'timeout'      => 'value',

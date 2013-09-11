@@ -1,8 +1,10 @@
 <!--
 #
 # Copyright (C) 2006-2008  Georgia Public Library Service
+# Copyright (C) 2013 Equinox Software, Inc.
 # 
 # Author: David J. Fiander
+# Author: Mike Rylander
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of version 2 of the GNU General Public
@@ -23,8 +25,10 @@
 
   <error-detect enabled="true" />
 
-  <!-- Set Net::Server::PreFork runtime parameters -->
+  <!-- Set Net::Server runtime parameters.  "personality" may -->
+  <!-- be either PreFork or Mulitplex. -->
   <server-params
+           personality='PreFork'
            min_servers='1'
            min_spare_servers='0' />
   
@@ -48,6 +52,12 @@
       allow_sc_status_then_login="disabled"
       timeout="60" />
   </listeners>
+
+  <!-- One or more Memecache servers are required for Mulitplex mode. -->
+  <!-- Cache server(s) are ignored in non-Multiplex mode -->
+  <cache>
+    <server>127.0.0.1:11211</server>
+  </cache>
 
   <accounts>
       <login id="scclient" password="clientpwd" institution="UWOLS">

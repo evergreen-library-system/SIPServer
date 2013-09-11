@@ -859,6 +859,8 @@ sub handle_login {
         _load_ils_handler($server, $uid);
     }
 
+    $server->{login_complete}->($status) if $server->{login_complete};
+
     $self->write_msg(LOGIN_RESP . $status);
 
     return $status ? LOGIN : '';

@@ -241,14 +241,16 @@ sub write_msg {
         $msg .= checksum($msg);
     }
 
+    my $outmsg = "$msg\r";
 
     if ($file) {
-        print $file "$msg\r";
+        print $file $outmsg;
     } else {
-        print "$msg\r";
-        syslog("LOG_INFO", "OUTPUT MSG: '$msg'");
+        my $rv = POSIX::write(fileno(STDOUT), $outmsg, length($outmsg));
+        syslog("LOG_ERR", "Error writing to STDOUT $!") unless $rv;
     }
 
+    syslog("LOG_INFO", "OUTPUT MSG: '$msg'");
     $last_response = $msg;
 }
 

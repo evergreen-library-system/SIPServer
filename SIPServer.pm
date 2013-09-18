@@ -113,6 +113,7 @@ sub process_request {
     my ($sockaddr, $port, $proto);
     my $transport;
 
+    $self->{account} = undef; # New connection, no need to keep login info
     $self->{config} = $config;
 
     $sockaddr = $self->{server}->{sockaddr};
@@ -135,6 +136,8 @@ sub process_request {
         return;
     } else {
         &$transport($self);
+        # Transport has shut down, remove any lingering login info
+        $self->{account} = undef;
     }
 }
 

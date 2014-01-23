@@ -937,12 +937,12 @@ sub handle_patron_info {
         $lang = $patron->language if $patron->language;
         $resp .= $lang . Sip::timestamp();
 
-        $resp .= add_count('patron_info/hold_items',    scalar @{$patron->hold_items   });
-        $resp .= add_count('patron_info/overdue_items', scalar @{$patron->overdue_items});
-        $resp .= add_count('patron_info/charged_items', scalar @{$patron->charged_items});
-        $resp .= add_count('patron_info/fine_items',    scalar @{$patron->fine_items   });
-        $resp .= add_count('patron_info/recall_items',  scalar @{$patron->recall_items });
-        $resp .= add_count('patron_info/unavail_holds', scalar @{$patron->unavail_holds});
+        $resp .= add_count('patron_info/hold_items',    scalar @{$patron->hold_items(undef,undef,1)   });
+        $resp .= add_count('patron_info/overdue_items', scalar @{$patron->overdue_items(undef,undef,1)});
+        $resp .= add_count('patron_info/charged_items', scalar @{$patron->charged_items(undef,undef,1)});
+        $resp .= add_count('patron_info/fine_items',    scalar @{$patron->fine_items(undef,undef,1)   });
+        $resp .= add_count('patron_info/recall_items',  scalar @{$patron->recall_items(undef,undef,1) });
+        $resp .= add_count('patron_info/unavail_holds', scalar @{$patron->unavail_holds(undef,undef,1)});
 
         # while the patron ID we got from the SC is valid, let's
         # use the one returned from the ILS, just in case...

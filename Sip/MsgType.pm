@@ -929,6 +929,12 @@ sub summary_info {
         return '';
     }
 
+    if ($summary_type > $#summary_map || not defined $summary_map[$summary_type]->{func}) {
+        # Huh, we don't have any code to handle the requested summary information.
+        # Pretend nothing was asked for instead.
+        return '';
+    }
+
     syslog("LOG_DEBUG", "Summary_info: index == '%d', field '%s'",
 	   $summary_type, $summary_map[$summary_type]->{fid});
 

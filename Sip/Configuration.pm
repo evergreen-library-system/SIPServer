@@ -111,7 +111,7 @@ sub find_service {
         }
         push @misses, $portstr;
     }
-    Sys::Syslog::syslog("LOG_WARN", "find_service: No match in: " . join(' ',@misses));
+    Sys::Syslog::syslog("LOG_WARNING", "find_service: No match in: " . join(' ',@misses));
     return;
 }
 

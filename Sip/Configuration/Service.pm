@@ -39,4 +39,9 @@ sub timeout {
     return $self->{timeout} || $self->SUPER::timeout();
 }
 
+sub allow_sc_status_then_login {
+    my $self = shift;
+    return $self->{'allow_sc_status_then_login'} =~ /true|yes|enabled/i ? 1 : 0;
+}
+
 1;

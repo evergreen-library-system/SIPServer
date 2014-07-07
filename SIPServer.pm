@@ -185,6 +185,13 @@ sub raw_transport {
             next;
         }
         $input =~ s/[\r\n]+$//sm;	# Strip off trailing line terminator
+        if ($input =~ /^99/) { # SC Status
+            unless ($service->allow_sc_status_then_login()) {
+                die 'raw_transport: sending SC status before login not enabled, exiting';
+            }
+            Sip::MsgType::handle($input, $self, SC_STATUS);
+            next;
+        }
         last if Sip::MsgType::handle($input, $self, LOGIN);
     }
     };

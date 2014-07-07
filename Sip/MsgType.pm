@@ -771,6 +771,21 @@ sub handle_sc_status {
 	$protocol_version = $new_proto;
     }
 
+    unless (exists $self->{account}) {
+        # If we haven't logged in yet, go ahead and
+        # return the SC status anyway, arbitrarily using the
+        # first account in Perl string sort order to specify
+        # the account, institution, and ILS. This supports
+        # raw clients such as Relais that insist on sending 99 first
+        # before 93.
+        syslog('LOG_INFO', 'sending SC status without logging in first');
+        my $mock_server;
+        $mock_server->{config} = $server->{config};
+        my $uid = (sort keys %{ $server->{config}->{accounts} })[0];
+        _load_ils_handler($mock_server, $uid);
+        return send_acs_status($self, $mock_server) ? SC_STATUS : '';
+    }
+
     if ($status == SC_STATUS_PAPER) {
 	syslog("LOG_WARNING", "Self-Check unit '%s@%s' out of paper",
 	       $self->{account}->{id}, $self->{account}->{institution});
@@ -832,37 +847,43 @@ sub handle_login {
         syslog("LOG_WARNING", "MsgType::handle_login: Invalid password for login '$uid'");
         $status = 0;
     } else {
-        # Store the active account someplace handy for everybody else to find.
-        $server->{account}     = $server->{config}->{accounts}->{$uid};
-        $inst                  = $server->{account}->{institution};
-        $server->{institution} = $server->{config}->{institutions}->{$inst};
-        $server->{policy}      = $server->{institution}->{policy};
-
-
-        syslog("LOG_INFO", "Successful login for '%s' of '%s'", $server->{account}->{id}, $inst);
-        #
-        # initialize connection to ILS
-        #
-        my $module = $server->{config}->{institutions}->{$inst}->{implementation};
-        $module->use;
-
-        if ($@) {
-            syslog("LOG_ERR", "%s: Loading ILS implementation '%s' for institution '%s' failed",
-               $server->{service}, $module, $inst);
-            die("Failed to load ILS implementation '$module'");
-        }
-
-        $server->{ils} = $module->new($server->{institution}, $server->{account});
-
-        if (!$server->{ils}) {
-            syslog("LOG_ERR", "%s: ILS connection to '%s' failed", $server->{service}, $inst);
-            die("Unable to connect to ILS '$inst'");
-        }
+        _load_ils_handler($server, $uid);
     }
 
     $self->write_msg(LOGIN_RESP . $status);
 
     return $status ? LOGIN : '';
+}
+
+sub _load_ils_handler {
+    my ($server, $uid) = @_;
+
+    # Store the active account someplace handy for everybody else to find.
+    $server->{account}     = $server->{config}->{accounts}->{$uid};
+    my $inst               = $server->{account}->{institution};
+    $server->{institution} = $server->{config}->{institutions}->{$inst};
+    $server->{policy}      = $server->{institution}->{policy};
+
+
+    syslog("LOG_INFO", "Successful login for '%s' of '%s'", $server->{account}->{id}, $inst);
+    #
+    # initialize connection to ILS
+    #
+    my $module = $server->{config}->{institutions}->{$inst}->{implementation};
+    $module->use;
+
+    if ($@) {
+        syslog("LOG_ERR", "%s: Loading ILS implementation '%s' for institution '%s' failed",
+           $server->{service}, $module, $inst);
+        die("Failed to load ILS implementation '$module'");
+    }
+
+    $server->{ils} = $module->new($server->{institution}, $server->{account});
+
+    if (!$server->{ils}) {
+        syslog("LOG_ERR", "%s: ILS connection to '%s' failed", $server->{service}, $inst);
+        die("Unable to connect to ILS '$inst'");
+    }
 }
 
 #

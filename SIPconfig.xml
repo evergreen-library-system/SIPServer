@@ -45,6 +45,7 @@
       port="127.0.0.1:6001/tcp"
       transport="RAW" 
       protocol="SIP/2.00"
+      allow_sc_status_then_login="disabled"
       timeout="60" />
   </listeners>
 

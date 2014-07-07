@@ -443,7 +443,7 @@ sub handle {
 # information will be returned to the terminal.
 # 
 sub build_patron_status {
-    my ($patron, $lang, $fields)= @_;
+    my ($patron, $lang, $fields, $server)= @_;
     $lang ||= '000';
     my $patron_pwd = $fields->{(FID_PATRON_PWD)};
     my $resp = (PATRON_STATUS_RESP);
@@ -451,17 +451,26 @@ sub build_patron_status {
     if ($patron) {
 	$resp .= patron_status_string($patron);
 	$resp .= $lang . Sip::timestamp();
-	$resp .= add_field(FID_PERSONAL_NAME, $patron->name);
 
 	# while the patron ID we got from the SC is valid, let's
 	# use the one returned from the ILS, just in case...
+	$resp .= add_field(FID_INST_ID, $fields->{(FID_INST_ID)});
 	$resp .= add_field(FID_PATRON_ID, $patron->id);
+	$resp .= add_field(FID_PERSONAL_NAME, $patron->name);
 	if ($protocol_version >= 2) {
 	    $resp .= add_field(FID_VALID_PATRON, 'Y');
 	    # Patron password is a required field.
 		$resp .= add_field(FID_VALID_PATRON_PWD, sipbool($patron->check_password($patron_pwd)));
 	    $resp .= maybe_add(FID_CURRENCY, $patron->currency);
 	    $resp .= maybe_add(FID_FEE_AMT, $patron->fee_amount);
+
+		# Relais extensions
+		if ($server->{institution}->relais_extensions_to_msg24()) {
+			$resp .= maybe_add(FID_HOME_ADDR,  $patron->address   );
+			$resp .= maybe_add(FID_EMAIL,      $patron->email_addr);
+			$resp .= maybe_add(FID_HOME_PHONE, $patron->home_phone);
+		}
+
 	}
 
 	$resp .= maybe_add(FID_SCREEN_MSG, $patron->screen_msg);
@@ -470,18 +479,18 @@ sub build_patron_status {
 	# Invalid patron id.  Report that the user has no privs.,
 	# no personal name, and is invalid (if we're using 2.00)
 	$resp .= 'YYYY' . (' ' x 10) . $lang . Sip::timestamp();
-	$resp .= add_field(FID_PERSONAL_NAME, '');
+	$resp .= add_field(FID_INST_ID, $fields->{(FID_INST_ID)});
 
 	# the patron ID is invalid, but it's a required field, so
 	# just echo it back
 	$resp .= add_field(FID_PATRON_ID, $fields->{(FID_PATRON_ID)});
+	$resp .= add_field(FID_PERSONAL_NAME, '');
 
 	if ($protocol_version >= 2) {
 	    $resp .= add_field(FID_VALID_PATRON, 'N');
 	}
     }
 
-    $resp .= add_field(FID_INST_ID, $fields->{(FID_INST_ID)});
 
     return $resp;
 }
@@ -502,7 +511,7 @@ sub handle_patron_status {
 
     $patron = $ils->find_patron($fields->{(FID_PATRON_ID)});
 
-    $resp = build_patron_status($patron, $lang, $fields);
+    $resp = build_patron_status($patron, $lang, $fields, $server);
 
     $self->write_msg($resp);
 
@@ -745,7 +754,7 @@ sub handle_block_patron {
         $patron->block($card_retained, $blocked_card_msg);
     }
 
-    $resp = build_patron_status($patron, $language, $fields);
+    $resp = build_patron_status($patron, $language, $fields, $server);
 
     $self->write_msg($resp);
     return(BLOCK_PATRON);

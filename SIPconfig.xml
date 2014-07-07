@@ -70,6 +70,7 @@
 	  	  status_update="false" offline="false"
 		  timeout="600"
 	  	  retries="3" />
+          <relais_extensions_to_msg24 enabled="false" />
     </institution>
 
     <institution id="LPL" implementation="ILS">

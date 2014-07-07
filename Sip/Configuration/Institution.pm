@@ -39,4 +39,12 @@ sub name {
     return $self->{name};
 }
 
+sub relais_extensions_to_msg24 {
+    my $self = shift;
+    return (
+        exists $self->{'relais_extensions_to_msg24'} &&
+        $self->{'relais_extensions_to_msg24'}->{'enabled'} =~ /true|yes|enabled/i
+    ) ? 1 : 0;
+}
+
 1;

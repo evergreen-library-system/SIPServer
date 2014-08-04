@@ -26,7 +26,7 @@ use Sys::Syslog qw(syslog);
 use Net::Server::PreFork;
 use Net::Server::Proto;
 use IO::Socket::INET;
-use Socket qw(:crlf);
+use Socket qw(:crlf SOL_SOCKET SO_KEEPALIVE IPPROTO_TCP TCP_KEEPALIVE);
 use Data::Dumper;		# For debugging
 require UNIVERSAL::require;
 
@@ -112,6 +112,19 @@ sub process_request {
     my $sockname;
     my ($sockaddr, $port, $proto);
     my $transport;
+
+    # This is kind of kinky, but allows us to avoid requiring Socket::Linux.
+    # A simple "Socket::Linux"->use won't suffice since we need access to
+    # all of it's bareword constants as well.
+    eval <<'    EVAL';
+    use Socket::Linux qw(TCP_KEEPINTVL TCP_KEEPIDLE TCP_KEEPCNT);
+    setsockopt($self->{server}->{client}, SOL_SOCKET,  SO_KEEPALIVE, 1);
+    setsockopt($self->{server}->{client}, IPPROTO_TCP, TCP_KEEPIDLE, 120);
+    setsockopt($self->{server}->{client}, IPPROTO_TCP, TCP_KEEPINTVL, 10);
+    EVAL
+
+    syslog('LOG_DEBUG', 
+        "Consider installing Socket::Linux for TCP keepalive: $@") if $@;
 
     $self->{account} = undef; # New connection, no need to keep login info
     $self->{config} = $config;

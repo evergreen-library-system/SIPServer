@@ -685,11 +685,15 @@ sub sip_protocol_loop {
         alarm 0; # Don't timeout while we are processing
         $input =~ s/[\r\n]+$//sm;    # Strip off any trailing line ends
 
+        my $start = time;
         my $status = Sip::MsgType::handle($input, $self, $expect);
         if ($status eq REQUEST_ACS_RESEND) {
             alarm $timeout;
             next;
         }
+
+        my $duration = sprintf("%0.3f", time - $start);
+        syslog('LOG_DEBUG', "SIP processing duration $duration : $input");
 
         if (!$status) {
             syslog("LOG_ERR", "raw_transport: failed to handle %s", substr($input,0,2));

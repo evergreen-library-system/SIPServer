@@ -26,7 +26,7 @@
   <error-detect enabled="true" />
 
   <!-- Set Net::Server runtime parameters.  "personality" may -->
-  <!-- be either PreFork or Mulitplex. -->
+  <!-- be either PreFork or Multiplex. -->
   <server-params
            personality='PreFork'
            min_servers='1'

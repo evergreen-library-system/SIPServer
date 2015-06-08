@@ -780,7 +780,7 @@ sub handle_sc_status {
 	$protocol_version = $new_proto;
     }
 
-    unless (exists $self->{account}) {
+    unless (defined $server->{account}) {
         # If we haven't logged in yet, go ahead and
         # return the SC status anyway, arbitrarily using the
         # first account in Perl string sort order to specify
@@ -797,13 +797,13 @@ sub handle_sc_status {
 
     if ($status == SC_STATUS_PAPER) {
 	syslog("LOG_WARNING", "Self-Check unit '%s@%s' out of paper",
-	       $self->{account}->{id}, $self->{account}->{institution});
+	       $server->{account}->{id}, $server->{account}->{institution});
     } elsif ($status == SC_STATUS_SHUTDOWN) {
 	syslog("LOG_WARNING", "Self-Check unit '%s@%s' shutting down",
-	       $self->{account}->{id}, $self->{account}->{institution});
+	       $server->{account}->{id}, $server->{account}->{institution});
     }
 
-    $self->{account}->{print_width} = $print_width;
+    $server->{account}->{print_width} = $print_width;
 
     return send_acs_status($self, $server) ? SC_STATUS : '';
 }

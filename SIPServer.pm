@@ -182,14 +182,25 @@ sub process_request {
         syslog("LOG_WARNING", "Unknown transport '%s', dropping", $service->{transport});
         return;
     } else {
+        # handle client authentication prior to
+        # passing further processing to sip_protocol_loop()
         &$transport($self);
-        # Transport has shut down, remove any lingering login info
-        $self->{account} = undef;
     }
 
     $self->sip_protocol_loop();
 
     syslog("LOG_INFO", '%s: shutting down', $transport);
+}
+
+# for forking personalities, don belt and suspenders
+# and ensure that the session account is cleared when
+# a client connection ends cleanly (as opposed to the
+# Net::Server backend having been terminated).
+sub post_process_request {
+    my $self = shift;
+   
+    $self->{account} = undef;
+
 }
 
 # mux_input is the callback used by Net::Server to handle

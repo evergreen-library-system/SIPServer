@@ -63,7 +63,7 @@
       </login>
       <login id="scclient-2" password="clientpwd-2"
              institution="UWOLS" />
-      <login id="lpl-sc" password="1234" institution="LPL" />
+      <login id="lpl-sc" password="1234" institution="LPL" encoding="ascii" />
       <login id="lpl-sc-beacock" password="xyzzy" location_code="WORKSTATION5"
              delimiter="|" error-detect="enabled" institution="LPL" />
   </accounts>

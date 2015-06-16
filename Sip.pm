@@ -219,7 +219,7 @@ sub read_SIP_packet {
 }
 
 #
-# write_msg($msg, $file)
+# write_msg($msg, $file, $encoding)
 #
 # Send $msg to the SC.  If error detection is active, then
 # add the sequence number (if $seqno is non-zero) and checksum
@@ -228,9 +228,13 @@ sub read_SIP_packet {
 # If $file is set, then it's a file handle: write to it, otherwise
 # just write to the default destination.
 #
+# If encoding is set, the message will be encoded to that encoding.
+#
 
 sub write_msg {
-    my ($self, $msg, $file) = @_;
+    my ($self, $msg, $file, $encoding) = @_;
+
+    $msg = encode($encoding, $msg) if ($encoding);
 
     if ($error_detection) {
         if (defined($self->{seqno})) {

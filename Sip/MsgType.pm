@@ -831,7 +831,7 @@ sub handle_request_acs_resend {
 
 sub handle_login {
     my ($self, $server) = @_;
-    my ($uid_algorithm, $pwd_algorithm);
+    my ($uid_algorithm, $pwd_algorithm, $sc_loc);
     my ($uid, $pwd);
     my $inst;
     my $fields;
@@ -842,6 +842,7 @@ sub handle_login {
 
     $uid = $fields->{(FID_LOGIN_UID)};
     $pwd = $fields->{(FID_LOGIN_PWD)};
+    $sc_loc = $fields->{(FID_LOCATION_CODE)};
 
     if ($uid_algorithm || $pwd_algorithm) {
         syslog("LOG_ERR", "LOGIN: Can't cope with non-zero encryption methods: uid = $uid_algorithm, pwd = $pwd_algorithm");
@@ -855,7 +856,7 @@ sub handle_login {
         syslog("LOG_WARNING", "MsgType::handle_login: Invalid password for login '$uid'");
         $status = 0;
     } else {
-        _load_ils_handler($server, $uid);
+        _load_ils_handler($server, $uid, $sc_loc);
     }
 
     $server->{login_complete}->($status) if $server->{login_complete};
@@ -866,14 +867,14 @@ sub handle_login {
 }
 
 sub _load_ils_handler {
-    my ($server, $uid) = @_;
+    my ($server, $uid, $sc_loc) = @_;
 
     # Store the active account someplace handy for everybody else to find.
     $server->{account}     = $server->{config}->{accounts}->{$uid};
     my $inst               = $server->{account}->{institution};
     $server->{institution} = $server->{config}->{institutions}->{$inst};
     $server->{policy}      = $server->{institution}->{policy};
-
+    $server->{account}->{location} = $sc_loc if $sc_loc;
 
     syslog("LOG_INFO", "Successful login for '%s' of '%s'", $server->{account}->{id}, $inst);
     #

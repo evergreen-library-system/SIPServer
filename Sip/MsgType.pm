@@ -856,6 +856,7 @@ sub handle_login {
         syslog("LOG_WARNING", "MsgType::handle_login: Invalid password for login '$uid'");
         $status = 0;
     } else {
+        $sc_loc ||= $server->{config}->{accounts}->{$uid}->{location_code};
         _load_ils_handler($server, $uid, $sc_loc);
     }
 

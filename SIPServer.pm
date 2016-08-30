@@ -405,7 +405,7 @@ sub mux_input {
 
                 if ($status) { # login OK
 
-                    $self->{state} = $self->{ils}->state() if (UNIVERSAL::can($self->{ils},'state'));
+                    $self->{state} = $self->{ils}->state() if ($self->{ils}->can('state'));
 
                     $cache_data->{success} = 1;
                     $cache_data->{net_server_parts} = {

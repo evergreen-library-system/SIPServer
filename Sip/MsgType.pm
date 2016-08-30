@@ -27,7 +27,6 @@ use strict;
 use warnings;
 use Exporter;
 use Sys::Syslog qw(syslog);
-use UNIVERSAL qw(can);
 
 use Sip qw(:all);
 use Sip::Constants qw(:all);

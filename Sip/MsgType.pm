@@ -866,7 +866,8 @@ sub handle_login {
         )) {
             $sc_loc ||= $server->{config}->{accounts}->{$uid}->{location_code};
         } else {
-            $sc_loc = $server->{config}->{accounts}->{$uid}->{location_code} || $sc_loc;
+            # Only use config file value
+            $sc_loc = $server->{config}->{accounts}->{$uid}->{location_code};
         }
         _load_ils_handler($server, $uid, $sc_loc);
     }

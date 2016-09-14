@@ -288,6 +288,15 @@ foreach my $i (keys(%handlers)) {
     }
 }
 
+# Stolen from ../ILS.pm, useful in here as well
+sub to_bool {
+    my $bool = shift;
+
+    # If it's defined, and matches a true sort of string, or is
+    # a non-zero number, then it's true.
+    return defined($bool) && (($bool =~ /true|y|yes/i) || $bool != 0);
+}
+
 sub new {
     my ($class, $msg, $seqno) = @_;
     my $self = {};

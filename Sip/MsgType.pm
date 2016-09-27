@@ -509,7 +509,6 @@ sub handle_patron_status {
     my $fields;
     my $patron;
     my $resp = (PATRON_STATUS_RESP);
-    my $account = $server->{account};
 
     ($lang, $date) = @{$self->{fixed_fields}};
     $fields = $self->{fields};
@@ -520,7 +519,7 @@ sub handle_patron_status {
 
     $resp = build_patron_status($patron, $lang, $fields, $server);
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return (PATRON_STATUS_REQ);
 }
@@ -643,7 +642,7 @@ sub handle_checkout {
 	}
     }
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
     return(CHECKOUT);
 }
 
@@ -716,14 +715,13 @@ sub handle_checkin {
     $resp .= maybe_add(FID_SCREEN_MSG, $status->screen_msg);
     $resp .= maybe_add(FID_PRINT_LINE, $status->print_line);
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return(CHECKIN);
 }
 
 sub handle_block_patron {
     my ($self, $server) = @_;
-    my $account = $server->{account};
     my $ils     = $server->{ils};
     my ($card_retained, $trans_date);
     my ($inst_id, $blocked_card_msg, $patron_id, $terminal_pwd);
@@ -763,7 +761,7 @@ sub handle_block_patron {
 
     $resp = build_patron_status($patron, $language, $fields, $server);
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
     return(BLOCK_PATRON);
 }
 
@@ -896,6 +894,8 @@ sub _load_ils_handler {
     $server->{institution} = $server->{config}->{institutions}->{$inst};
     $server->{policy}      = $server->{institution}->{policy};
     $server->{account}->{location} = $sc_loc if $sc_loc;
+    # Set the encoding for responses messages.
+    $server->{encoding} = $server->{account}->{encoding} || $server->{institution}->{implementation_config}->{encoding};
 
     syslog("LOG_INFO", "Successful login for '%s' of '%s'", $server->{account}->{id}, $inst);
     #
@@ -974,7 +974,6 @@ sub summary_info {
 sub handle_patron_info {
     my ($self, $server) = @_;
     my $ils = $server->{ils};
-    my $account = $server->{account};
     my ($lang, $trans_date, $summary) = @{$self->{fixed_fields}};
     my $fields = $self->{fields};
     my ($inst_id, $patron_id, $terminal_pwd, $patron_pwd, $start, $end);
@@ -1083,7 +1082,7 @@ sub handle_patron_info {
         }
     }
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return(PATRON_INFO);
 }
@@ -1091,7 +1090,6 @@ sub handle_patron_info {
 sub handle_end_patron_session {
     my ($self, $server) = @_;
     my $ils = $server->{ils};
-    my $account = $server->{account};
     my $trans_date;
     my $fields = $self->{fields};
     my $resp = END_SESSION_RESP;
@@ -1112,7 +1110,7 @@ sub handle_end_patron_session {
     $resp .= maybe_add(FID_SCREEN_MSG, $screen_msg);
     $resp .= maybe_add(FID_PRINT_LINE, $print_line);
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return(END_PATRON_SESSION);
 }
@@ -1120,7 +1118,6 @@ sub handle_end_patron_session {
 sub handle_fee_paid {
     my ($self, $server) = @_;
     my $ils = $server->{ils};
-    my $account = $server->{account};
     my ($trans_date, $fee_type, $pay_type, $currency) = @{$self->{fixed_fields}};
     my $fields = $self->{fields};
     my ($fee_amt, $inst_id, $patron_id, $terminal_pwd, $patron_pwd);
@@ -1147,7 +1144,7 @@ sub handle_fee_paid {
     $resp .= maybe_add(FID_SCREEN_MSG, $status->screen_msg);
     $resp .= maybe_add(FID_PRINT_LINE, $status->print_line);
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return(FEE_PAID);
 }
@@ -1155,7 +1152,6 @@ sub handle_fee_paid {
 sub handle_item_information {
     my ($self, $server) = @_;
     my $ils = $server->{ils};
-    my $account = $server->{account};
     my $trans_date;
     my $fields = $self->{fields};
     my $resp = ITEM_INFO_RESP;
@@ -1216,7 +1212,7 @@ sub handle_item_information {
         }
     }
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return(ITEM_INFORMATION);
 }
@@ -1224,7 +1220,6 @@ sub handle_item_information {
 sub handle_item_status_update {
     my ($self, $server) = @_;
     my $ils = $server->{ils};
-    my $account = $server->{account};
     my ($trans_date, $item_id, $terminal_pwd, $item_props);
     my $fields = $self->{fields};
     my $status;
@@ -1264,7 +1259,7 @@ sub handle_item_status_update {
     $resp .= maybe_add(FID_SCREEN_MSG, $status->screen_msg);
     $resp .= maybe_add(FID_PRINT_LINE, $status->print_line);
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return(ITEM_STATUS_UPDATE);
 }
@@ -1272,7 +1267,6 @@ sub handle_item_status_update {
 sub handle_patron_enable {
     my ($self, $server) = @_;
     my $ils    = $server->{ils};
-    my $account = $server->{account};
     my $fields = $self->{fields};
     my ($trans_date, $patron_id, $terminal_pwd, $patron_pwd);
     my ($status, $patron);
@@ -1316,7 +1310,7 @@ sub handle_patron_enable {
 
     $resp .= add_field(FID_INST_ID, $ils->institution);
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return(PATRON_ENABLE);
 }
@@ -1324,7 +1318,6 @@ sub handle_patron_enable {
 sub handle_hold {
     my ($self, $server) = @_;
     my $ils = $server->{ils};
-    my $account = $server->{account};
     my ($hold_mode, $trans_date);
     my ($expiry_date, $pickup_locn, $hold_type, $patron_id, $patron_pwd);
     my ($item_id, $title_id, $fee_ack);
@@ -1389,7 +1382,7 @@ sub handle_hold {
     $resp .= maybe_add(FID_SCREEN_MSG, $status->screen_msg);
     $resp .= maybe_add(FID_PRINT_LINE, $status->print_line);
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return(HOLD);
 }
@@ -1397,7 +1390,6 @@ sub handle_hold {
 sub handle_renew {
     my ($self, $server) = @_;
     my $ils = $server->{ils};
-    my $account = $server->{account};
     my ($third_party, $no_block, $trans_date, $nb_due_date);
     my ($patron_id, $patron_pwd, $item_id, $title_id, $item_props, $fee_ack);
     my $fields = $self->{fields};
@@ -1474,7 +1466,7 @@ sub handle_renew {
     $resp .= maybe_add(FID_SCREEN_MSG, $status->screen_msg);
     $resp .= maybe_add(FID_PRINT_LINE, $status->print_line);
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return(RENEW);
 }
@@ -1482,7 +1474,6 @@ sub handle_renew {
 sub handle_renew_all {
     my ($self, $server) = @_;
     my $ils = $server->{ils};
-    my $account = $server->{account};
     my ($trans_date, $patron_id, $patron_pwd, $terminal_pwd, $fee_ack);
     my $fields = $self->{fields};
     my $resp = RENEW_ALL_RESP;
@@ -1523,7 +1514,7 @@ sub handle_renew_all {
     $resp .= maybe_add(FID_SCREEN_MSG, $status->screen_msg);
     $resp .= maybe_add(FID_PRINT_LINE, $status->print_line);
 
-    $self->write_msg($resp, undef, $account->{encoding});
+    $self->write_msg($resp, undef, $server->{encoding});
 
     return(RENEW_ALL);
 }
@@ -1627,7 +1618,7 @@ sub send_acs_status {
 
     # Do we want to tell the terminal its location?
 
-    $self->write_msg($msg, undef, $account->{encoding});
+    $self->write_msg($msg, undef, $server->{encoding});
     return 1;
 }
 

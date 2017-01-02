@@ -26,6 +26,7 @@ use warnings;
 use English;
 use Exporter;
 use Encode;
+use Unicode::Normalize;
 
 use Sys::Syslog qw(syslog);
 use POSIX qw(strftime);
@@ -234,7 +235,26 @@ sub read_SIP_packet {
 sub write_msg {
     my ($self, $msg, $file, $encoding) = @_;
 
-    $msg = encode($encoding, $msg) if ($encoding);
+    if ($encoding) {
+        # Use nomalization form D, because some conversion blow up
+        # without it.
+        $msg = NFD($msg);
+        if ($encoding eq 'ascii') {
+            # Try to maintain a reasonable version of the content by
+            # stripping diacritics from the text, given that the SIP client
+            # wants just plain ASCII. This is the base requirement according
+            # to the SIP2 specification.
+
+            # Stripping the combining characters converts ""béè♁ts"
+            # into "bee?ts" instead of "b???ts" - better, eh?
+            $msg =~ s/\pM+//og;
+        }
+        $msg = encode($encoding, $msg);
+    } else {
+        # Send an UTF-8 string.  This makes the length call, below
+        # succeed and fixes LP 1628995.
+        $msg = encode_utf8($msg);
+    }
 
     if ($error_detection) {
         if (defined($self->{seqno})) {

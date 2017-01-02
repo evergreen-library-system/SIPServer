@@ -895,7 +895,15 @@ sub _load_ils_handler {
     $server->{policy}      = $server->{institution}->{policy};
     $server->{account}->{location} = $sc_loc if $sc_loc;
     # Set the encoding for responses messages.
-    $server->{encoding} = $server->{account}->{encoding} || $server->{institution}->{implementation_config}->{encoding};
+    $server->{encoding} = $server->{account}->{encoding}
+        || $server->{institution}->{encoding}
+        || $server->{institution}->{implementation_config}->{encoding}
+        || 'ascii'; # Use ascii if not set.  The spec expects this.
+    # We shouldn't be looking at the implementation config here, but
+    # that's where the encoding lived for the longest time.  So, we
+    # look there in the interest of backward compatibility.  That
+    # should be officially deprecated at some point, and that check
+    # removed.
 
     syslog("LOG_INFO", "Successful login for '%s' of '%s'", $server->{account}->{id}, $inst);
     #

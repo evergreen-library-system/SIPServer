@@ -708,7 +708,9 @@ sub handle_checkin {
             $resp .= maybe_add(FID_DESTINATION_LOCATION, $item->destination_loc    );
             $resp .= maybe_add(FID_HOLD_PATRON_ID,       $item->hold_patron_bcode  );
             $resp .= maybe_add(FID_HOLD_PATRON_NAME,     $item->hold_patron_name   );
-            $resp .= maybe_add(FID_HOME_PHONE,           $item->hold_patron_phone  );
+	    if ($server->{institution}->phone_ext_to_msg10()) {
+                $resp .= maybe_add(FID_HOME_PHONE,           $item->hold_patron_phone  );
+            }
         }
     }
 

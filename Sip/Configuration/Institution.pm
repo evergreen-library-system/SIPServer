@@ -46,4 +46,12 @@ sub relais_extensions_to_msg24 {
     ) ? 1 : 0;
 }
 
+sub phone_ext_to_msg10 {
+    my $self = shift;
+    return (
+        exists $self->{'phone_ext_to_msg10'} &&
+        $self->{'phone_ext_to_msg10'}->{'enabled'} =~ /true|yes|enabled/i
+    ) ? 1 : 0;
+}
+
 1;

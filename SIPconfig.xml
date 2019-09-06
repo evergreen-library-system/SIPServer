@@ -81,6 +81,7 @@
 	  	  retries="3" />
           <relais_extensions_to_msg24 enabled="false" />
 	  <encoding>ascii</encoding>
+	  <phone_ext_to_msg10 enabled="false" />
     </institution>
 
     <institution id="LPL" implementation="ILS">
